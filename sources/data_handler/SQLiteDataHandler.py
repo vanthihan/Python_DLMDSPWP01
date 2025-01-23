@@ -2,9 +2,10 @@ import pandas as pd
 from sqlalchemy import create_engine
 from utils.exception import DataSetHandlerException
 
-class SQLiteDataHandler:
+class SQLiteDataHandler():
     def __init__(self, db_path):
         self.engine = create_engine(f'sqlite:///{db_path}')
+        self.m_db_path = db_path
 
     def save_to_db(self, table_name, data):
         try:

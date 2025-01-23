@@ -42,8 +42,8 @@ class IdealFunctionSelector:
             # Select the ideal function with the least deviation which is 1st item of sorted list of deviation
             selected_func_from_ideal[train_col_idx] = list_of_deviations[0]
         
-        # for train_func, (selected_ideal_func, deviation) in selected_func_from_ideal.items():
-        #     print(f"Train function: [{train_func}] mapped to Ideal function: [{selected_ideal_func}] with deviation: [{deviation:.10f}]")
+        for train_func, (selected_ideal_func, deviation) in selected_func_from_ideal.items():
+            print(f"Train function: [{train_func}] mapped to Ideal function: [{selected_ideal_func}] with deviation: [{deviation:.10f}]")
 
         # Create a new DataFrame for the result
         result = pd.DataFrame()
