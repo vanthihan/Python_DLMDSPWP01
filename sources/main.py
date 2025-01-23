@@ -1,5 +1,6 @@
 from bokeh.layouts import row
 from bokeh.plotting import figure, show
+import pandas as pd
 
 from data_handler.DataSetHandler import DataSetHandler
 from data_handler.IdealFunctionSelector import IdealFunctionSelector
@@ -54,7 +55,19 @@ def main(dataset_root_path) :
         train_data_obj.plot_data()
         test_data_obj.plot_data()
 
-        test_data_obj.evaluate()
+
+        # Combine plots
+        merged_df = pd.merge(training_data, best_4_ideal_funcs, on='x')
+        print(merged_df)
+
+        csv_path_result_combined = dataset_root_path + 'csv_path_result_combined.csv'
+        merged_df.to_csv(csv_path_result_combined, index=False)
+
+        sql_db_path_combined = dataset_root_path + 'csv_path_result_combined.db'
+        combined_obj = DataSetHandler(csv_path_result_combined, sql_db_path_combined, 'combined_db')
+        combined_obj.data_invoke()
+        combined_obj.plot_data()
+
 
         # Evaluate test data
         # evaluator = TestDataEvaluator(test_data, ideal_data, chosen_functions, training_data)
@@ -69,6 +82,6 @@ if __name__ == '__main__':
     data_set_path_2 = './data_set/dataset_2/'
 
     main(data_set_path_1)
-    main(data_set_path_2)
+    # main(data_set_path_2)
 
     
