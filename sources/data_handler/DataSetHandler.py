@@ -9,7 +9,7 @@ class DataSetHandler(SQLiteDataHandler):
         self.m_csv_path = csv_path
         self.m_db_name = db_name
 
-    def data_invoke(self):
+    def data_init(self):
         try:
             self.save_to_db(self.m_db_name, pd.read_csv(self.m_csv_path))
             return self.load_from_db(self.m_db_name)
