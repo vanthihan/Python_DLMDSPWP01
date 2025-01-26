@@ -38,8 +38,6 @@ class IdealFunctionSelector:
         result = pd.DataFrame()
         result['x'] = self.training_data['x']  # Copy the x column from train data
 
-        print(the_fours_ideal)
-
         for train_col, (ideal_func, deviation) in the_fours_ideal.items():
             print(f"Train [{train_col}] matched to Ideal [{ideal_func}] with deviation: [{deviation:.10f}]")
             result[f"train[{train_col}]->ideal[{ideal_func}]"] = self.ideal_data[ideal_func]
