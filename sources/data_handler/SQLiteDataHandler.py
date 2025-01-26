@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 from utils.exception import DataSetHandlerException
 
 class SQLiteDataHandler():
-    def __init__(self, db_path):
-        self.engine = create_engine(f'sqlite:///{db_path}')
-        self.m_db_path = db_path
+    def __init__(self, sql_path):
+        self.engine = create_engine(f'sqlite:///{sql_path}')
+        self.m_sql_path = sql_path
 
     def save_to_db(self, table_name, data):
         """
