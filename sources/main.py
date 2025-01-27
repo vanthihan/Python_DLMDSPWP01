@@ -68,6 +68,7 @@ class TaskProcessor:
                 else:
                     test_result_NOK.append(test_data_row)
 
+        # Save test result into 2 separated data frames
         test_result_OK_df = pd.DataFrame(test_result_OK[1:])
         test_result_OK_df['x'] = pd.to_numeric(test_result_OK_df['x'])
         test_result_OK_df['y'] = pd.to_numeric(test_result_OK_df['y'])
@@ -78,6 +79,18 @@ class TaskProcessor:
 
         self.m_test_data_obj.m_test_result_OK = test_result_OK_df
         self.m_test_data_obj.m_test_result_NOK = test_result_NOK_df
+
+        # Get test result SQL data table
+        result_csv_path = self.m_output_path + 'test_result.csv'
+        result_sql_path = self.m_output_path + 'test_result.db'
+        result_sql_name = 'test_result_table'
+        sql_result_table = self.m_test_data_obj.get_test_result_data(result_sql_path, result_sql_name)
+
+        # Save test result into a new csv file
+        sql_result_table.to_csv(result_csv_path, index=False)
+
+        print("Test Result Data Table Content:")
+        print(sql_result_table)
 
     def plot_chosen_ideal_funcs(self) :
         # Create new datset hander object for best fit ideal functions
@@ -112,11 +125,8 @@ class TaskProcessor:
         combined_obj.plot_data()
 
     def plot_test_data(self) :
-        test_result_OK_figure_path = self.m_output_path + 'test_result_OK.html'
-        test_result_NOK_figure_path = self.m_output_path + 'test_result_NOK.html'
-
-        self.m_test_data_obj.plot_data(self.m_test_data_obj.m_test_result_OK, test_result_OK_figure_path)
-        self.m_test_data_obj.plot_data(self.m_test_data_obj.m_test_result_NOK, test_result_NOK_figure_path)
+        figure_path = self.m_output_path + 'test_result.html'
+        self.m_test_data_obj.plot_data(figure_path)
 
     def run(self):
         self.data_init()

@@ -40,7 +40,7 @@ class IdealFunctionSelector:
 
         for train_col, (ideal_func, deviation) in the_fours_ideal.items():
             print(f"Train [{train_col}] matched to Ideal [{ideal_func}] with deviation: [{deviation:.10f}]")
-            result[f"train[{train_col}]->ideal[{ideal_func}]"] = self.ideal_data[ideal_func]
+            result[ideal_func] = self.ideal_data[ideal_func]
 
 
         return result
