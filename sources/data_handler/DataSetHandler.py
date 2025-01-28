@@ -2,6 +2,7 @@ import pandas as pd
 from data_handler.SQLiteDataHandler import SQLiteDataHandler
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import save
+from bokeh.models import Label
 
 class DataSetHandler(SQLiteDataHandler):
     def __init__(self, data_info):
@@ -20,17 +21,14 @@ class DataSetHandler(SQLiteDataHandler):
 
     def plot_data(self):
         try:
-            figure_path = self.m_sql_path[:-3] + '.html' # Removing '.db.' from the sql_path
-            output_file(figure_path)
-
             # Define a custom color list
             color_list = [
                 "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
                 "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
             ]
 
-            plot = figure(title=f"{self.m_sql_table_name[:-3].replace("_", " ")} Data Visualiztion",
-                          x_axis_label="x", y_axis_label="y", width=1200, height=800)
+            plot = figure(title=f"{self.m_sql_table_name.replace("_", " ")} plot",
+                          x_axis_label="x", y_axis_label="y", width=1500, height=800)
 
             data_to_plot = self.load_from_db(self.m_sql_table_name)
             for i, y_col in enumerate(data_to_plot.columns[1:]):
@@ -51,8 +49,7 @@ class DataSetHandler(SQLiteDataHandler):
             plot.legend.title_text_font_size = "12pt"
             plot.add_layout(plot.legend[0], 'right')
 
-            save(plot)
-            print(f"Plot file saved to: {figure_path}")
+            return plot
 
         except Exception as e:
             raise ValueError(f"{e}")

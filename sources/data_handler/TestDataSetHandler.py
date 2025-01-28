@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import save
-
-from bokeh.models import CategoricalColorMapper
-from bokeh.palettes import Category20
+from bokeh.models import Label
 
 from data_handler.SQLiteDataHandler import SQLiteDataHandler
 
@@ -71,8 +69,8 @@ class TestDataSetHandler():
         plot = figure(title="Test Data Visualization", x_axis_label='x', y_axis_label='y', width=1200, height=800)
 
         # Visualize passed and not passed test samples
-        plot.scatter(data_1['x'], data_1['y'], size=10, color="green", alpha=1, legend_label="Passed Test Data")
-        plot.scatter(data_2['x'], data_2['y'], size=10, color="red", alpha=1, legend_label="Not Passed Test Data")
+        plot.scatter(data_1['x'], data_1['y'], size=10, color="green", alpha=1, legend_label="Passed")
+        plot.scatter(data_2['x'], data_2['y'], size=10, color="red", alpha=1, legend_label="Not Passed")
 
         # Define a custom color list
         color_list = [

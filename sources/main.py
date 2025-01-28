@@ -1,5 +1,8 @@
 import pandas as pd
 import csv
+from bokeh.models import Label
+from bokeh.plotting import figure, show, output_file
+from bokeh.io import save
 
 from data_handler.DataSetHandler import DataSetHandler
 from data_handler.IdealFunctionSelector import IdealFunctionSelector
@@ -12,11 +15,14 @@ class TaskProcessor:
     def __init__(self, input_path, output_path):
         self.m_input_path = input_path
         self.m_output_path = output_path
+
         self.m_train_data_obj = None
         self.m_ideal_data_obj = None
         self.m_test_data_obj = None
-        self.m_test_result_data_obj = None
+
         self.m_the_fours_ideal_funcs = None
+        self.m_ideal_func_selector_obj = None
+        self.m_test_result_data_obj = None
 
     def data_init(self):
         csv_path_train = self.m_input_path + 'train.csv'
@@ -40,8 +46,8 @@ class TaskProcessor:
         ideal_data = self.m_ideal_data_obj.load_from_db('ideal_table')
 
         # Select ideal functions
-        ideal_func_selector_obj = IdealFunctionSelector(training_data, ideal_data)
-        self.m_the_fours_ideal_funcs = ideal_func_selector_obj.find_ideal_functions()
+        self.m_ideal_func_selector_obj = IdealFunctionSelector(training_data, ideal_data)
+        self.m_the_fours_ideal_funcs = self.m_ideal_func_selector_obj.find_ideal_functions()
 
     def test_data_evaluation(self):
         # Prepare training data and the chosen fours  from ideal data
@@ -80,7 +86,7 @@ class TaskProcessor:
         self.m_test_data_obj.m_test_result_OK = test_result_OK_df
         self.m_test_data_obj.m_test_result_NOK = test_result_NOK_df
 
-        # Get test result SQL data table
+        # Get test result SQL data table with format x, y, deviation, ideal function name
         result_csv_path = self.m_output_path + 'test_result.csv'
         result_sql_path = self.m_output_path + 'test_result.db'
         result_sql_name = 'test_result_table'
@@ -92,7 +98,15 @@ class TaskProcessor:
         print("Test Result Data Table Content:")
         print(sql_result_table)
 
-    def plot_chosen_ideal_funcs(self) :
+    def visualize_training_data(self) :
+        plot = self.m_train_data_obj.plot_data()
+
+        figure_path = self.m_output_path + 'train_data.html'
+        output_file(figure_path)
+        save(plot)
+        print(f"Training data's plot saved at: {figure_path}")
+
+    def visualize_chosen_ideal_funcs(self) :
         # Create new datset hander object for best fit ideal functions
         the_fours_ideal_csv_path = output_path + 'the_fours_ideal.csv'
         the_fours_ideal_sql_path = output_path + 'the_fours_ideal.db'
@@ -104,9 +118,23 @@ class TaskProcessor:
         the_fours_ideal_obj.data_init()
 
         # Plot the data
-        the_fours_ideal_obj.plot_data()
+        plot = the_fours_ideal_obj.plot_data()
 
-    def plot_chosen_ideal_funcs_and_train_data(self) :
+        note_text = "Description:\n"
+        for train_col, (ideal_func, deviation) in self.m_ideal_func_selector_obj.m_the_fours_ideal.items():
+            note_text += (f"The deviation of the chosen ideal [{ideal_func}] is: [{deviation:.4f}]\n")
+
+        note = Label(x=10, y=10, x_units='screen', y_units='screen',
+                    text=note_text, text_font_size="12pt",
+                    text_color="black", background_fill_color="white", background_fill_alpha=1)
+        plot.add_layout(note, 'right')
+
+        figure_path = self.m_output_path + 'the_fours_ideal.html'
+        output_file(figure_path)
+        save(plot)
+        print(f"The fours ideal function's plot saved at: {figure_path}")
+
+    def visualize_chosen_ideal_funcs_and_train_data(self) :
         # Combine plots
         training_data = self.m_train_data_obj.load_from_db('train_table')
         merged_df = pd.merge(training_data, self.m_the_fours_ideal_funcs, on='x')
@@ -122,9 +150,26 @@ class TaskProcessor:
 
         combined_obj = DataSetHandler(combined_data_info)
         combined_obj.data_init()
-        combined_obj.plot_data()
 
-    def plot_test_data(self) :
+        # Plot the data
+        plot = combined_obj.plot_data()
+
+        # Add a note to the plot
+        note_text = "Description:\n"
+        for train_col, (ideal_func, deviation) in self.m_ideal_func_selector_obj.m_the_fours_ideal.items():
+            note_text += (f"Ideal [{ideal_func}] matched to Train [{train_col}] - Min Deviation: [{deviation:.4f}]\n")
+
+        note = Label(x=10, y=10, x_units='screen', y_units='screen',
+                    text=note_text, text_font_size="12pt",
+                    text_color="black", background_fill_color="white", background_fill_alpha=1)
+        plot.add_layout(note, 'right')
+
+        figure_path = self.m_output_path + 'train_and_the_fours_ideal.html'
+        output_file(figure_path)
+        save(plot)
+        print(f"The training and fours ideal function's plot saved at: {figure_path}")
+
+    def visualize_test_result_data(self) :
         figure_path = self.m_output_path + 'test_result.html'
         self.m_test_data_obj.plot_data(figure_path)
 
@@ -132,10 +177,11 @@ class TaskProcessor:
         self.data_init()
         self.find_ideal_functions()
         self.test_data_evaluation()
- 
-        self.plot_chosen_ideal_funcs()
-        self.plot_chosen_ideal_funcs_and_train_data()
-        self.plot_test_data()
+
+        self.visualize_training_data()
+        self.visualize_chosen_ideal_funcs()
+        self.visualize_chosen_ideal_funcs_and_train_data()
+        self.visualize_test_result_data()
 
 if __name__ == '__main__':
     input_path = './data_set/dataset_1/'
