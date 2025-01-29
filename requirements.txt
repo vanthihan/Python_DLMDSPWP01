@@ -2,3 +2,4 @@ pandas
 bokeh
 sqlalchemy
 matplotlib
+pytest

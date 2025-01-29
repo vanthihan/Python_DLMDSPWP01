@@ -1,6 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from utils.DataException import DataException
+from src.utils.data_exception import DataException
 
 class SQLiteDataHandler():
     def __init__(self, sql_path):

@@ -4,14 +4,11 @@ from bokeh.models import Label
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import save
 
-from data_handler.DataSetHandler import DataSetHandler
-from data_handler.IdealFunctionSelector import IdealFunctionSelector
-from data_handler.TestDataSetHandler import TestDataSetHandler
-from utils.DataInfoType import DataInfoType
-
-from utils.DataException import DataException
-from utils.DataException import FileNotFoundException
-from utils.DataException import VisualizationException
+from src.data_handler.data_handler import DataSetHandler
+from src.ideal_function_selector import IdealFunctionSelector
+from src.function_evaluator import FunctionEvaluator
+from src.utils.data_info_type import DataInfoType
+from src.utils.data_exception import DataException
 
 class TaskProcessor:
     def __init__(self, input_path, output_path):
@@ -38,11 +35,11 @@ class TaskProcessor:
             csv_path_train = self.m_input_path + 'train.csv'
             csv_path_ideal = self.m_input_path + 'ideal.csv'
 
-            sql_sql_path_train = self.m_output_path + 'train.db'
-            sql_sql_path_ideal = self.m_output_path + 'ideal.db'
+            sql_path_train = self.m_output_path + 'train.db'
+            sql_path_ideal = self.m_output_path + 'ideal.db'
 
-            training_data_info = DataInfoType(csv_path_train, sql_sql_path_train, "train_table")
-            ideal_data_info = DataInfoType(csv_path_ideal, sql_sql_path_ideal, "ideal_table")
+            training_data_info = DataInfoType(csv_path_train, sql_path_train, "train_table")
+            ideal_data_info = DataInfoType(csv_path_ideal, sql_path_ideal, "ideal_table")
 
             self.m_train_data_obj = DataSetHandler(training_data_info)
             self.m_ideal_data_obj = DataSetHandler(ideal_data_info)
@@ -50,8 +47,8 @@ class TaskProcessor:
             self.m_train_data_obj.data_init()
             self.m_ideal_data_obj.data_init()
 
-        except (DataException, FileNotFoundException) as e:
-                print(f"ERROR: {e}")
+        except (DataException) as e:
+                raise DataException(f"ERROR: {e}")
 
     def find_ideal_functions(self):
         """
@@ -73,8 +70,8 @@ class TaskProcessor:
             the_fours_ideal_csv_path = self.m_output_path + 'the_fours_ideal.csv'
             self.m_the_fours_ideal_funcs.to_csv(the_fours_ideal_csv_path, index=False)
 
-        except (DataException, FileNotFoundException) as e:
-                print(f"ERROR: {e}")
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def test_data_evaluation(self):
         """
@@ -92,7 +89,7 @@ class TaskProcessor:
             training_data = self.m_train_data_obj.load_from_db('train_table')
             the_chosen_fours = self.m_the_fours_ideal_funcs
             csv_path_test = self.m_input_path + 'test.csv'
-            self.m_test_data_obj = TestDataSetHandler(training_data, the_chosen_fours)
+            self.m_test_data_obj = FunctionEvaluator(training_data, the_chosen_fours)
 
             # Open the CSV file and read line-by-line
             test_result_OK = []
@@ -101,8 +98,9 @@ class TaskProcessor:
                 csv_reader = csv.DictReader(csv_file)
 
                 # Get the header (1st line)
-                test_result_OK.append(csv_reader.fieldnames)
-                test_result_NOK.append(csv_reader.fieldnames)
+                headers = csv_reader.fieldnames
+                test_result_OK = [headers]
+                test_result_NOK = [headers]
 
                 # Start evaluate the test data from 2nd line
                 for test_data_row in csv_reader:
@@ -114,8 +112,8 @@ class TaskProcessor:
 
             # Save test result into 2 separated data frames
             test_result_OK_df = pd.DataFrame(test_result_OK[1:])
-            test_result_OK_df['x'] = pd.to_numeric(test_result_OK_df['x'])
-            test_result_OK_df['y'] = pd.to_numeric(test_result_OK_df['y'])
+            test_result_OK_df['x'] = pd.to_numeric(test_result_OK_df['x'], errors='coerce')
+            test_result_OK_df['y'] = pd.to_numeric(test_result_OK_df['y'], errors='coerce')
 
             test_result_NOK_df = pd.DataFrame(test_result_NOK[1:])
             test_result_NOK_df['x'] = pd.to_numeric(test_result_NOK_df['x'])
@@ -134,8 +132,8 @@ class TaskProcessor:
             sql_result_table.to_csv(result_csv_path, index=False)
             print(f"Test Result Data saved to: {result_csv_path}")
 
-        except (DataException, FileNotFoundException) as e:
-                print(f"ERROR: {e}")
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def visualize_training_data(self) :
         """
@@ -150,8 +148,8 @@ class TaskProcessor:
             save(plot)
             print(f"Training data's plot saved at: {figure_path}")
 
-        except (VisualizationException) as e:
-                print(f"ERROR: {e}")
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def visualize_chosen_ideal_funcs(self) :
         """
@@ -183,8 +181,9 @@ class TaskProcessor:
             output_file(figure_path)
             save(plot)
             print(f"The fours ideal function's plot saved at: {figure_path}")
-        except (VisualizationException) as e:
-            print(f"ERROR: {e}")
+
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def visualize_chosen_ideal_funcs_and_train_data(self) :
         """
@@ -228,8 +227,9 @@ class TaskProcessor:
             output_file(figure_path)
             save(plot)
             print(f"The training and fours ideal function's plot saved at: {figure_path}")
-        except (DataException, VisualizationException) as e:
-            print(f"ERROR: {e}")
+
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def visualize_test_result_data(self) :
         """
@@ -242,8 +242,9 @@ class TaskProcessor:
         try:
             figure_path = self.m_output_path + 'test_result.html'
             self.m_test_data_obj.plot_data(figure_path)
-        except (VisualizationException) as e:
-            print(f"ERROR: {e}")
+
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")
 
     def run(self):
         """
@@ -259,5 +260,5 @@ class TaskProcessor:
             self.visualize_chosen_ideal_funcs_and_train_data()
             self.visualize_test_result_data()
 
-        except (DataException, FileNotFoundException, VisualizationException) as e:
-            print(f"ERROR: {e}")
+        except (DataException) as e:
+            raise DataException(f"ERROR: {e}")

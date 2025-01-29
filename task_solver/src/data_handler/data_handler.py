@@ -1,11 +1,6 @@
 import pandas as pd
-from data_handler.SQLiteDataHandler import SQLiteDataHandler
-from bokeh.plotting import figure, show, output_file
-from bokeh.io import save
-from bokeh.models import Label
-
-from utils.DataException import DataException
-from utils.DataException import FileNotFoundException
+from src.data_handler.sql_data_handler import SQLiteDataHandler
+from bokeh.plotting import figure
 
 class DataSetHandler(SQLiteDataHandler):
     def __init__(self, data_info):
@@ -21,12 +16,19 @@ class DataSetHandler(SQLiteDataHandler):
         Save data from inputed csv file into sql file
         """
         try:
-            self.save_to_db(self.m_sql_table_name, pd.read_csv(self.m_csv_path))
+            df = pd.read_csv(self.m_csv_path)  # Loading the CSV
+            if df.empty:
+                raise ValueError(f"CSV file is empty: {self.m_csv_path}")
+
+            self.save_to_db(self.m_sql_table_name, df)  # Save data to DB
             return self.load_from_db(self.m_sql_table_name)
-        except FileNotFoundException:
-            raise FileNotFoundException(f"File not found: {self.m_csv_path}")
-        except DataException:
-            raise DataException(f"Error loading CSV file")
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"CSV file not found: {self.m_csv_path}")
+        except pd.errors.ParserError:
+            raise ValueError(f"Error parsing CSV file: {self.m_csv_path}")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error during data initialization: {e}")
 
     def plot_data(self):
         """
@@ -63,5 +65,7 @@ class DataSetHandler(SQLiteDataHandler):
 
             return plot
 
-        except DataException as e:
-            raise DataException(f"{e}")
+        except ValueError as ve:
+            raise ValueError(f"Plotting error: {ve}")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error during plotting: {e}")

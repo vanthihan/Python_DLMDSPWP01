@@ -1,7 +1,5 @@
-from data_handler.TaskProcessor import TaskProcessor
-from utils.DataException import DataException
-from utils.DataException import FileNotFoundException
-from utils.DataException import VisualizationException
+from src.task_processor import TaskProcessor
+from src.utils.data_exception import DataException
 
 if __name__ == '__main__':
     try:
@@ -16,13 +14,13 @@ if __name__ == '__main__':
         input_path: provided data set csv file paths of training, ideal and test dataset
         output_path: folder to store all figure, generated sql database and csv files
         """
-        input_path = './data_set/dataset_1/'
+        input_path = '../input/dataset_1/'
         output_path = '../output/dataset_1/'
 
         task_processor = TaskProcessor(input_path, output_path)
         task_processor.run()
 
-    except (DataException, FileNotFoundException, VisualizationException) as e:
-            print(f"ERROR: {e}")
-
-
+    except DataException:
+            raise DataException("Error handling data")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error in main: {e}")

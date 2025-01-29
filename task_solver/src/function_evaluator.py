@@ -2,18 +2,23 @@ import numpy as np
 import pandas as pd
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import save
-from bokeh.models import Label
 
-from data_handler.SQLiteDataHandler import SQLiteDataHandler
-from utils.DataException import DataException
+from src.data_handler.sql_data_handler import SQLiteDataHandler
+from src.utils.data_exception import DataException
 
-class TestDataSetHandler():
+class FunctionEvaluator():
     def __init__(self, train_data, the_chosen_fours):
+        if train_data is None or the_chosen_fours is None:
+            raise ValueError("Training data and ideal functions must not be None.")
+
+        if train_data.empty or the_chosen_fours.empty:
+            raise ValueError("Training data and ideal functions must not be empty.")
+
         self.m_train_data = train_data
         self.m_the_chosen_fours = the_chosen_fours
         self.m_test_result_OK = None    # Contain only x and y value of passed test data
         self.m_test_result_NOK = None   # Contain only x and y value of NOT passed test data
-        self.m_test_result_data = []    # Create a test result data which contains x, y, deviation and ideal function name
+        self.m_test_result_data = []    # Create a test result data which contains x, y, deviation, and ideal function name
 
     def evaluate(self, test_data):
         """
@@ -64,13 +69,17 @@ class TestDataSetHandler():
 
             return result
         except DataException:
-            raise DataException(f"Error handling data")
+            raise DataException("Error handling test data during evaluation.")
+        except ValueError as ve:
+            raise ValueError(f"Invalid test data: {ve}")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error in evaluate method: {e}")
 
     def plot_data(self, figure_path):
         """
-        Creating plot which mixed data of test status and the fours ideal function.
-        The test data which passed test criterias will be showns as Green, otherwise,
-        not passed test data will be shown as "Red"
+        Creating plot which mixed data of test status and the four ideal functions.
+        The test data which passed test criteria will be shown as Green, otherwise,
+        not passed test data will be shown as "Red".
         """
         try:
             data_1 = self.m_test_result_OK
@@ -88,7 +97,7 @@ class TestDataSetHandler():
                 "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
             ]
 
-            # Visualize the fours ideal datas
+            # Visualize the four ideal data functions
             for i, y_col in enumerate(self.m_the_chosen_fours.columns[1:]):
                 # Custom color for each function
                 color = color_list[i % len(color_list)]
@@ -115,11 +124,13 @@ class TestDataSetHandler():
 
             print(f"Plot file saved to: {figure_path}")
         except DataException:
-            raise DataException(f"Error handling data")
+            raise DataException("Error handling data during plot generation.")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error in plot_data method: {e}")
 
     def get_test_result_data(self, sql_path, table_name):
         """
-        Returning the test result data table as formated x, y, deviation and ideal function name
+        Returning the test result data table as formatted x, y, deviation, and ideal function name
         """
         try:
             sql_data = SQLiteDataHandler(sql_path)
@@ -128,4 +139,6 @@ class TestDataSetHandler():
 
             return sql_data.load_from_db(table_name)
         except DataException:
-            raise DataException(f"Error handling data")
+            raise DataException("Error handling data while saving or loading from database.")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error in get_test_result_data method: {e}")
