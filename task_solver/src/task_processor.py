@@ -146,6 +146,7 @@ class TaskProcessor:
             figure_path = self.m_output_path + 'train_data.html'
             output_file(figure_path)
             save(plot)
+            show(plot)
             print(f"Training data's plot saved at: {figure_path}")
 
         except (DataException) as e:
@@ -180,6 +181,7 @@ class TaskProcessor:
             figure_path = self.m_output_path + 'the_fours_ideal.html'
             output_file(figure_path)
             save(plot)
+            show(plot)
             print(f"The fours ideal function's plot saved at: {figure_path}")
 
         except (DataException) as e:
@@ -226,6 +228,7 @@ class TaskProcessor:
             figure_path = self.m_output_path + 'train_and_the_fours_ideal.html'
             output_file(figure_path)
             save(plot)
+            show(plot)
             print(f"The training and fours ideal function's plot saved at: {figure_path}")
 
         except (DataException) as e:

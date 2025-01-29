@@ -57,6 +57,7 @@ pip install -r requirements.txt
 
 ### 1. Execute the program to solve the assignment
 ```sh
+cd task_solver
 python main.py
 ```
 ### 2. Check the result in output folder
@@ -64,5 +65,6 @@ python main.py
 ## Run the unittest
 To run all tests:
 ```sh
+cd task_solver
 python -m unittest discover -s tests
 ```

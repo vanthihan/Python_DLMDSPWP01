@@ -121,7 +121,7 @@ class FunctionEvaluator():
             # Save the plot to an HTML file
             output_file(figure_path)
             save(plot)
-
+            show(plot)
             print(f"Plot file saved to: {figure_path}")
         except DataException:
             raise DataException("Error handling data during plot generation.")
