@@ -4,22 +4,34 @@ from bokeh.plotting import figure, show, output_file
 from bokeh.io import save
 from bokeh.models import Label
 
+from utils.DataException import DataException
+from utils.DataException import FileNotFoundException
+
 class DataSetHandler(SQLiteDataHandler):
     def __init__(self, data_info):
+        """
+        Init data member variables
+        """
         super().__init__(data_info.sql_path)
         self.m_csv_path = data_info.csv_path
         self.m_sql_table_name = data_info.sql_table_name
 
     def data_init(self):
+        """
+        Save data from inputed csv file into sql file
+        """
         try:
             self.save_to_db(self.m_sql_table_name, pd.read_csv(self.m_csv_path))
             return self.load_from_db(self.m_sql_table_name)
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File not found: {self.m_csv_path}")
-        except Exception as e:
-            raise ValueError(f"Error loading CSV file: {e}")
+        except FileNotFoundException:
+            raise FileNotFoundException(f"File not found: {self.m_csv_path}")
+        except DataException:
+            raise DataException(f"Error loading CSV file")
 
     def plot_data(self):
+        """
+        Visualize data
+        """
         try:
             # Define a custom color list
             color_list = [
@@ -51,5 +63,5 @@ class DataSetHandler(SQLiteDataHandler):
 
             return plot
 
-        except Exception as e:
-            raise ValueError(f"{e}")
+        except DataException as e:
+            raise DataException(f"{e}")
