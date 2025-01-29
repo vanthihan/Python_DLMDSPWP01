@@ -1,22 +1,5 @@
 # Python_DLMDSPWP01
 
-python3 -m venv vir_env
-source vir_env/bin/activate
-
-pip install -r requirements.txt
-
-run the program:
-python main.py
-
-run the unittest
-
-python -m unittest discover -s tests
-or
-python -m unittest tests.test_ideal_function_selector
-
-
-# Python_DLMDSPWP01
-
 ## Overview
 This project implements an **Ideal Function Selector** that selects the best-fitting ideal function based on the least squared deviation from a given training dataset.
 
